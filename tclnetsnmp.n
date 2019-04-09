@@ -1,0 +1,248 @@
+.\" $Id: tclnetsnmp.n,v 1.7 2016/01/09 20:37:16 swp Exp $
+.\"
+.Dd January 28, 2014
+.Dt tclnetsnmp n
+.Os
+.Sh NAME
+.Nm netsnmp::session,
+.Nm netsnmp::get,
+.Nm netsnmp::bulkget,
+.Nm netsnmp::walk,
+.Nm netsnmp::bulkwalk,
+.Nm netsnmp::bulkwalk_ex,
+.Nm netsnmp::set,
+.Nm netsnmp::add_mibdir,
+.Nm netsnmp::read_module,
+.Nm netsnmp::read_mib,
+.Nm netsnmp::read_all_mibs,
+.Nm netsnmp::oid,
+.Nm netsnmp::name
+.Nd the tcl procedures based on a netsnmp package for work with snmp devices.
+.\" .Sh LIBRARY
+.\" .Lb libN
+.Sh SYNOPSIS
+.\" .In file.h
+.Nm package require tclnetsnmp 3.0
+.Pp
+.Nm netsnmp::session
+.Op Fl version Ar snmpVersion
+.Op Fl community Ar snmpCommunity
+.Op Fl
+.Ar addr
+.Pp
+.Nm netsnmp::get
+.Ar $sess
+.Ar oidlst
+.Nm netsnmp::bulkget
+.Ar $sess
+.Op Cm -non-repeaters|-n Ar non_repeaters
+.Op Cm -max-repetitions|-r Ar max_repetitions
+.Op Fl
+.Ar oidlst
+.Pp
+.Nm netsnmp::walk
+.Ar $sess
+.Ar oid
+.Nm netsnmp::bulkwalk
+.Ar $sess
+.Op Cm -non-repeaters|-n Ar non_repeaters
+.Op Cm -max-repetitions|-r Ar max_repetitions
+.Op Fl
+.Ar oidlst
+.Nm netsnmp::bulkwalk_ex
+.Ar $sess
+.Op Cm -non-repeaters|-n Ar non_repeaters
+.Op Cm -max-repetitions|-r Ar max_repetitions
+.Op Fl
+.Ar oidlst
+.Pp
+.Nm netsnmp::set
+.Ar $sess
+.Ar oid type value
+.Op Ar oid type value ...
+.Pp
+.Nm netsnmp::add_mibdir
+.Ar mib_directory
+.Nm netsnmp::read_module
+.Ar moduleName
+.Nm netsnmp::read_mib
+.Ar filename
+.Nm netsnmp::read_all_mibs
+.Pp
+.Nm netsnmp::oid
+.Ar oid
+.Nm netsnmp::name
+.Ar oid
+.Sh DESCRIPTION
+.Nm netsnmp::session
+.Op Fl version Ar snmpVersion
+.Op Fl community Ar snmpCommunity
+.Op Fl
+.Ar addr
+.Pp
+.Nm netsnmp::get
+.Ar $sess
+.Ar oidlst
+.Bl -item -offset indent -compact
+.It
+The function uses the SNMP GET request to query for information on a network entity. 
+.El
+.Pp
+.Nm netsnmp::bulkget
+.Ar $sess
+.Op Cm -non-repeaters|-n Ar non_repeaters
+.Op Cm -max-repetitions|-r Ar max_repetitions
+.Op Fl
+.Ar oidlst
+.Bl -item -offset indent -compact
+.It
+The function uses the SNMP GETBULK request to query a network entity efficiently for 
+information.
+.El
+.Pp
+.Nm netsnmp::walk
+.Ar $sess
+.Ar oid
+.Bl -item -offset ident -compact
+.It
+The netsnmp::walk is routine that uses SNMP GETNEXT requests to query a network 
+entity for a tree of information. All variables in the subtree below the given
+OID are queried and their values presented to the user.
+.El
+.Pp
+.Nm netsnmp::bulkwalk
+.Ar $sess
+.Op Cm -non-repeaters|-n Ar non_repeaters
+.Op Cm -max-repetitions|-r Ar max_repetitions
+.Op Fl
+.Ar oidlst
+.br
+.Nm netsnmp::bulkwalk_ex
+.Ar $sess
+.Op Cm -non-repeaters|-n Ar non_repeaters
+.Op Cm -max-repetitions|-r Ar max_repetitions
+.Op Fl
+.Ar oidlst
+.Bl -item -offset ident -compact
+.It
+The netsnmp::bulkwalk is routine that uses SNMP GETBULK requests to query a network 
+entity efficiently for a tree of information. 
+.El
+.Pp
+.Nm netsnmp::set
+.Ar $sess
+.Ar oid type value
+.Op Ar oid type value ...
+.Bl -item -offset indent -compact
+.It
+The netsnmp::set is an function that uses the SNMP SET request to set information on 
+a network entity. One or more object identifiers (
+.Ar oid
+) must be given as arguments 
+on the command line. A 
+.Ar type 
+and a 
+.Ar value 
+to be set must accompany each object 
+identifier.
+.It
+The 
+.Ar type
+is a single character, one of:
+.Bl -tag -width "xx" -offset indent -compact
+.It i 
+INTEGER
+.It u
+UNSIGNED
+.It s
+STRING
+.It x
+HEX STRING
+.It d  
+DECIMAL STRING
+.It n  
+NULLOBJ
+.It o  
+OBJID
+.It t  
+TIMETICKS
+.It a  
+IPADDRESS
+.It b  
+BITS
+.El
+.It
+Most of these will use the obvious corresponding ASN.1 type. 
+.Sq s , 
+.Sq x ,
+.Sq d 
+and 
+.Sq b 
+are all different ways of specifying an OCTET STRING value,
+and the 
+.Sq u 
+unsigned type is also used for handling Gauge32 values.
+.It
+If you have the proper MIB file loaded, you can, in most cases, replace
+the type with an 
+.Sq =
+sign. For an object of type OCTET STRING this will
+assume a string like the 
+.Sq s
+type notation. For other types it will do
+.Qo The Right Thing Qc .
+.El
+.Pp
+.Nm netsnmp::add_mibdir
+.Ar dirname
+.Bl -item -offset ident -compact
+.It
+netsnmp::add_mibdir is used to add the specified directory to the path of 
+locations which are searched for files containing MIB modules. Note that
+this does not actually load the MIB modules located in that directory,
+but is simply an initialisation step to make them available to netsnmp::read_module.
+.El
+.Pp
+.Nm netsnmp::read_module
+.Ar name
+.br
+.Nm netsnmp::read_mib
+.Ar filename
+.Bl -item -offset ident -compact
+.It
+netsnmp::read_module takes the name of a MIB module (which need not be
+the same as the name of the file that  contains  the  module),  locates
+this within the configured list of MIB directories, and loads the defi-
+nitions from the module into the active MIB tree.  It  also  loads  any
+MIB modules listed in the IMPORTS clause of this module.
+.El
+.Pp
+.Nm netsnmp::oid
+.Ar oid
+.Bl -item -offset ident -compact
+.It
+netsnmp::oid takes a string containing a textual version of an object identifier
+(in either numeric or descriptor form), and transforms this into the 
+corresponding list of sub-identifiers.
+.El
+.Pp
+.Nm netsnmp::name
+.Ar oid
+.Bl -item -offset ident -compact
+.It
+netsnmp::name is similar, but return descriptor form of oid.
+.El
+.Sh EXAMPLES
+.Bd -literal -compact
+
+package require Tcl 8.6
+package require tclnetsnmp 3.0
+
+set sd [netsnmp::session [lindex $argv 0]]
+set rd [netsnmp::bulkwalk_ex $sd [list IF-MIB::ifName IF-MIB::ifAlias]]
+netsnmp_dump_result $rd rd
+unset sd
+.Ed
+.Sh NOTES
+.Sh SEE ALSO
+.Xr tclnetsnmp n

@@ -1,0 +1,19 @@
+# $Id: tclnetsnmp.tclm4,v 1.4 2016/01/08 07:58:17 swp Exp $
+
+package provide M4_PACKAGE M4_PACKAGE_VERSION
+
+proc netsnmp_dump_result {result name {lvl 0} {tab 2}} {
+	puts [format "%*s%s := {" [expr {$lvl * $tab}] {} $name]
+	dict for {k1 d1} $result {
+		puts [format "%*s{%s} := {" [expr {($lvl + 1) * $tab}] {} $k1]
+		dict for {k2 d2} $d1 {
+			puts [format "%*s%s := {" [expr {($lvl + 2) * $tab}] {} $k2]
+			dict for {k3 d3} $d2 {
+				puts [format "%*s%-5s := %s" [expr {($lvl + 3) * $tab}] {} $k3 $d3]
+			}
+			puts [format "%*s}" [expr {($lvl + 2) * $tab}] {}]
+		}
+		puts [format "%*s}" [expr {($lvl + 1) * $tab}] {}]
+	}
+	puts [format "%*s}" [expr {$lvl * $tab}] {}]
+}
